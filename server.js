@@ -7,14 +7,19 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const PORT = process.env.PORT || 8901;
 
-// --- Local date helper ---
+// Force Asia/Shanghai timezone for all date operations
+process.env.TZ = 'Asia/Shanghai';
+
+// --- Local date helper (Asia/Shanghai) ---
 function localDateStr(d) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return year + '-' + month + '-' + day;
+  if (!d) d = new Date();
+  const parts = d.toLocaleString('sv-SE', { timeZone: 'Asia/Shanghai' }).split(' ')[0];
+  return parts; // "2026-04-30"
 }
 function todayStr() { return localDateStr(new Date()); }
+function nowTimeStr() {
+  return new Date().toLocaleTimeString('sv-SE', { timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit', hour12: false });
+}
 
 // --- Data ---
 const DATA_DIR = path.join(__dirname, 'data');
@@ -296,7 +301,7 @@ app.post('/api/records', (req, res) => {
     accountId: accountId || 'acc_1',
     note: (note || '').trim(),
     date: date || todayStr(),
-    time: time || '',
+    time: time || nowTimeStr(),
     createdAt: new Date().toISOString()
   };
 
@@ -713,7 +718,7 @@ app.post('/api/quick-entry', (req, res) => {
     accountId: accountId || 'acc_1',
     note: parsed.note,
     date: todayStr(),
-    time: new Date().toTimeString().slice(0, 5),
+    time: nowTimeStr(),
     createdAt: new Date().toISOString()
   };
 
@@ -843,7 +848,7 @@ app.post('/api/recurring/generate', (req, res) => {
         accountId: rec.accountId,
         note: rec.note || (rec.frequency === 'monthly' ? '月度自动' : rec.frequency === 'weekly' ? '周度自动' : '日常自动'),
         date: genDate,
-        time: '00:00',
+        time: nowTimeStr(),
         createdAt: new Date().toISOString(),
         recurring: rec.id,
       };

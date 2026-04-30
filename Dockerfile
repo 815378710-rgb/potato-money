@@ -1,4 +1,6 @@
 FROM node:18-alpine
+ENV TZ=Asia/Shanghai
+RUN apk add --no-cache tzdata
 WORKDIR /app
 COPY package.json .
 RUN npm install --production
