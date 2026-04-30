@@ -641,13 +641,12 @@ body {
 ::-webkit-scrollbar { width: 0; height: 0; }
 
 /* === Add page scroll fix === */
-#page-add {
+#page-add.active {
   height: calc(100dvh - 66px - var(--safe-bottom));
   display: flex;
   flex-direction: column;
   overflow-y: hidden;
 }
-#page-add.active { display: flex; }
 #page-add .category-grid { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 #page-add .record-form { flex-shrink: 0; }
 #page-add .numpad { flex-shrink: 0; }
