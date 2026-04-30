@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="土豆记账">
+  <meta name="theme-color" content="#2D3436">
+  <title>🥔 土豆记账</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Main App -->
+  <div id="app">
+    <!-- Pages -->
+    <div id="page-home" class="page active">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-top">
+          <div class="month-selector" id="month-selector">
+            <span id="current-month"></span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="header-actions">
+            <button class="icon-btn" id="btn-accounts" title="账户">💳</button>
+          </div>
+        </div>
+        <!-- Summary Card -->
+        <div class="summary-card">
+          <div class="summary-row">
+            <div class="summary-item">
+              <div class="summary-label">支出</div>
+              <div class="summary-amount expense" id="total-expense">0.00</div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+              <div class="summary-label">收入</div>
+              <div class="summary-amount income" id="total-income">0.00</div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+              <div class="summary-label">结余</div>
+              <div class="summary-amount" id="total-balance">0.00</div>
+            </div>
+          </div>
+          <!-- Budget bar -->
+          <div class="budget-bar" id="budget-bar" style="display:none">
+            <div class="budget-progress">
+              <div class="budget-fill" id="budget-fill"></div>
+            </div>
+            <div class="budget-text" id="budget-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Entry Bar -->
+      <div class="quick-entry-section">
+        <div class="quick-entry-bar">
+          <input type="text" id="quick-entry-input" placeholder="输入如：午饭35、打车48..." autocomplete="off">
+          <button class="quick-entry-btn" id="btn-quick-entry">记</button>
+        </div>
+        <div id="quick-entry-hint" class="quick-entry-hint"></div>
+      </div>
+
+      <!-- Today's records -->
+      <div class="section">
+        <div class="section-header">
+          <h3>今日账单</h3>
+          <button class="text-btn" id="btn-view-all">查看全部 →</button>
+        </div>
+        <div id="today-records" class="record-list"></div>
+      </div>
+
+      <!-- Recent records -->
+      <div class="section">
+        <div class="section-header">
+          <h3>最近记录</h3>
+        </div>
+        <div id="recent-records" class="record-list"></div>
+      </div>
+    </div>
+
+    <!-- Records Page -->
+    <div id="page-records" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <h2>所有记录</h2>
+        <div class="filter-group" id="filter-group">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="expense">支出</button>
+          <button class="filter-btn" data-filter="income">收入</button>
+        </div>
+      </div>
+      <div id="all-records" class="record-list"></div>
+    </div>
+
+    <!-- Stats Page -->
+    <div id="page-stats" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <h2>统计报表</h2>
+      </div>
+      <div class="stats-content">
+        <div class="chart-section">
+          <h3>支出分类</h3>
+          <canvas id="category-chart" width="300" height="300"></canvas>
+          <div id="category-list" class="category-stats"></div>
+        </div>
+        <div class="chart-section">
+          <h3>每日趋势</h3>
+          <canvas id="trend-chart" width="350" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accounts Page -->
+    <div id="page-accounts" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <h2>我的账户</h2>
+        <button class="text-btn" id="btn-add-account">+ 添加</button>
+      </div>
+      <div id="accounts-list" class="accounts-grid"></div>
+    </div>
+
+    <!-- Add Record Page -->
+    <div id="page-add" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="closeAddPage()">←</button>
+        <div class="type-tabs">
+          <button class="type-tab active" data-type="expense">支出</button>
+          <button class="type-tab" data-type="income">收入</button>
+        </div>
+        <div style="width:40px"></div>
+      </div>
+
+      <!-- Amount Display -->
+      <div class="amount-display">
+        <span class="currency">¥</span>
+        <span class="amount-value" id="amount-display">0</span>
+      </div>
+
+      <!-- Category Grid -->
+      <div id="category-grid" class="category-grid"></div>
+
+      <!-- Note & Date -->
+      <div class="record-form">
+        <div class="form-row">
+          <label>备注</label>
+          <input type="text" id="record-note" placeholder="添加备注...">
+        </div>
+        <div class="form-row">
+          <label>日期</label>
+          <input type="date" id="record-date">
+        </div>
+        <div class="form-row">
+          <label>账户</label>
+          <select id="record-account"></select>
+        </div>
+      </div>
+
+      <!-- Number Pad -->
+      <div class="numpad">
+        <div class="numpad-row">
+          <button class="numpad-key" data-key="7">7</button>
+          <button class="numpad-key" data-key="8">8</button>
+          <button class="numpad-key" data-key="9">9</button>
+          <button class="numpad-key key-del" data-key="del">⌫</button>
+        </div>
+        <div class="numpad-row">
+          <button class="numpad-key" data-key="4">4</button>
+          <button class="numpad-key" data-key="5">5</button>
+          <button class="numpad-key" data-key="6">6</button>
+          <button class="numpad-key key-add" data-key="ok">✓</button>
+        </div>
+        <div class="numpad-row">
+          <button class="numpad-key" data-key="1">1</button>
+          <button class="numpad-key" data-key="2">2</button>
+          <button class="numpad-key" data-key="3">3</button>
+          <button class="numpad-key key-add" data-key="ok2" style="visibility:hidden"></button>
+        </div>
+        <div class="numpad-row">
+          <button class="numpad-key key-zero" data-key="0">0</button>
+          <button class="numpad-key" data-key=".">.</button>
+          <button class="numpad-key key-add key-ok-bottom" data-key="ok3">记一笔</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Page -->
+    <div id="page-budget" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <h2>预算管理</h2>
+        <button class="text-btn" id="btn-add-budget">+ 设置</button>
+      </div>
+      <div id="budget-list" class="budget-list"></div>
+    </div>
+
+    <!-- Recurring Page -->
+    <div id="page-recurring" class="page">
+      <div class="page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <h2>周期记账</h2>
+        <button class="text-btn" id="btn-add-recurring">+ 添加</button>
+      </div>
+      <div id="recurring-list" class="budget-list"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar -->
+  <nav class="tab-bar" id="tab-bar">
+    <button class="tab active" data-page="home">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </button>
+    <button class="tab" data-page="records">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>明细</span>
+    </button>
+    <button class="tab tab-add" id="btn-add-record">
+      <div class="add-btn-circle">+</div>
+    </button>
+    <button class="tab" data-page="stats">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>统计</span>
+    </button>
+    <button class="tab" data-page="budget">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+      <span>预算</span>
+    </button>
+    <button class="tab" data-page="recurring">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span>周期</span>
+    </button>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

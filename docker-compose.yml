@@ -1,0 +1,10 @@
+version: '3'
+services:
+  potato-money:
+    build: .
+    image: potato-money
+    container_name: potato-money
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
