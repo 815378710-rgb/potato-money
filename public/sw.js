@@ -1,8 +1,6 @@
-const CACHE_NAME = 'potato-money-v2';
+const CACHE_NAME = 'potato-money-v3';
 const ASSETS = [
   '/',
-  '/css/style.css',
-  '/js/app.js',
   '/manifest.json',
 ];
 
@@ -15,19 +13,44 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for API calls
+  // API calls: network only
   if (e.request.url.includes('/api/')) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    e.respondWith(fetch(e.request));
     return;
   }
-  // Cache first for static assets
+
+  // HTML/CSS/JS: network first, fall back to cache
+  const url = new URL(e.request.url);
+  if (url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || 
+      url.pathname.endsWith('.js') || url.pathname === '/') {
+    e.respondWith(
+      fetch(e.request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Images/static: cache first, then network
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    caches.match(e.request).then(cached => {
+      const fetched = fetch(e.request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return response;
+      }).catch(() => cached);
+      return cached || fetched;
+    })
   );
 });
