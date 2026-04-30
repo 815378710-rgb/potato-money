@@ -110,6 +110,13 @@ initDefaults();
 // --- Middleware ---
 app.use(compression());
 app.use(express.json());
+// Disable caching for sw.js to ensure service worker updates are picked up
+app.use((req, res, next) => {
+  if (req.url === '/sw.js') {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- Health ---
