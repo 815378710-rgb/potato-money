@@ -169,9 +169,10 @@ function renderRecordList(selector, list, showEmpty) {
 
 // --- Records Page ---
 function renderRecords() {
-  let filtered = records;
-  if (filterType === 'expense') filtered = records.filter(r => r.type === 'expense');
-  if (filterType === 'income') filtered = records.filter(r => r.type === 'income');
+  // 按当前月份过滤，再按类型筛选
+  let filtered = records.filter(r => r.date && r.date.startsWith(currentMonth));
+  if (filterType === 'expense') filtered = filtered.filter(r => r.type === 'expense');
+  if (filterType === 'income') filtered = filtered.filter(r => r.type === 'income');
 
   renderRecordList('#all-records', filtered.slice(0, 100), true);
 }
@@ -507,6 +508,7 @@ async function saveRecord() {
     await loadRecords();
     renderHome();
     renderCategoryGrid();
+    closeAddPage();
   } else {
     showToast(r.message || '保存失败');
   }
@@ -869,6 +871,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Accounts button
   $('#btn-accounts').addEventListener('click', () => switchPage('accounts'));
+
+  // Add account
+  $('#btn-add-account').addEventListener('click', () => {
+    const name = prompt('请输入账户名称：');
+    if (name && name.trim()) {
+      api('POST', '/accounts', { name: name.trim() }).then(r => {
+        if (r.success) showToast('账户已添加');
+        loadAccounts().then(renderAccounts);
+      });
+    }
+  });
 
   // Quick entry
   $('#btn-quick-entry').addEventListener('click', handleQuickEntry);
