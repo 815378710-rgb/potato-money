@@ -42,7 +42,6 @@ function loadDB() {
     accounts: [],    // 账户: { id, name, type, balance, icon, color, createdAt }
     categories: [],  // 分类: { id, name, type, icon, color, sort }
     records: [],     // 记录: { id, amount, type, categoryId, accountId, note, date, time, createdAt }
-    budgets: [],     // 预算: { id, categoryId, amount, month, createdAt }
     recurring: [],   // 周期性: { id, amount, type, categoryId, accountId, note, frequency, dayOfMonth, dayOfWeek, nextDate, lastGenerated, enabled, createdAt }
   };
   saveDB(_cache);
@@ -103,9 +102,6 @@ function initDefaults() {
       { id: 'cat_24', name: '其他', type: 'income', icon: '💵', color: '#95A5A6', sort: 99 },
     ];
   }
-
-  // Default budgets
-  if (!db.budgets) db.budgets = [];
 
   saveDB(db);
 }
@@ -395,22 +391,6 @@ app.get('/api/stats/monthly', (req, res) => {
     else dailyTrend[r.date].expense += r.amount;
   });
 
-  // Budget info
-  const budgets = (db.budgets || []).filter(b => b.month === targetMonth);
-  const budgetInfo = budgets.map(b => {
-    const spent = records.filter(r => r.type === 'expense' && r.categoryId === b.categoryId)
-      .reduce((sum, r) => sum + r.amount, 0);
-    const cat = cats.find(c => c.id === b.categoryId);
-    return {
-      categoryId: b.categoryId,
-      categoryName: cat ? cat.name : '未知',
-      categoryIcon: cat ? cat.icon : '📦',
-      budget: b.amount,
-      spent: Math.round(spent * 100) / 100,
-      remaining: Math.round((b.amount - spent) * 100) / 100,
-    };
-  });
-
   res.json({
     success: true,
     data: {
@@ -420,7 +400,6 @@ app.get('/api/stats/monthly', (req, res) => {
       balance: Math.round((totalIncome - totalExpense) * 100) / 100,
       byCategory: enrichedByCategory,
       dailyTrend,
-      budgets: budgetInfo,
     }
   });
 });
@@ -457,70 +436,6 @@ app.get('/api/stats/yearly', (req, res) => {
 });
 
 // ============================================
-// Budget API
-// ============================================
-
-app.get('/api/budgets', (req, res) => {
-  const db = loadDB();
-  const { month } = req.query;
-  let budgets = db.budgets || [];
-  if (month) budgets = budgets.filter(b => b.month === month);
-
-  // Enrich with spent amount
-  const cats = db.categories || [];
-  const records = db.records || [];
-  const enriched = budgets.map(b => {
-    const spent = records
-      .filter(r => r.type === 'expense' && r.categoryId === b.categoryId && r.date && r.date.startsWith(b.month))
-      .reduce((sum, r) => sum + r.amount, 0);
-    const cat = cats.find(c => c.id === b.categoryId);
-    return {
-      ...b,
-      categoryName: cat ? cat.name : '未知',
-      categoryIcon: cat ? cat.icon : '📦',
-      spent: Math.round(spent * 100) / 100,
-      remaining: Math.round((b.amount - spent) * 100) / 100,
-    };
-  });
-
-  res.json({ success: true, data: enriched });
-});
-
-app.post('/api/budgets', (req, res) => {
-  const { categoryId, amount, month } = req.body;
-  if (!categoryId || !amount || !month) {
-    return res.status(400).json({ success: false, message: '请填写完整信息' });
-  }
-  const db = loadDB();
-
-  // Check if budget already exists for this category and month
-  const existing = (db.budgets || []).find(b => b.categoryId === categoryId && b.month === month);
-  if (existing) {
-    existing.amount = Number(amount);
-    saveDB(db);
-    return res.json({ success: true, data: existing });
-  }
-
-  const budget = {
-    id: 'bud_' + uuidv4().slice(0, 8),
-    categoryId,
-    amount: Math.round(Number(amount) * 100) / 100,
-    month,
-    createdAt: new Date().toISOString()
-  };
-  db.budgets.push(budget);
-  saveDB(db);
-  res.json({ success: true, data: budget });
-});
-
-app.delete('/api/budgets/:id', (req, res) => {
-  const db = loadDB();
-  db.budgets = (db.budgets || []).filter(b => b.id !== req.params.id);
-  saveDB(db);
-  res.json({ success: true });
-});
-
-// ============================================
 // Data Management API
 // ============================================
 
@@ -534,7 +449,6 @@ app.get('/api/export', (req, res) => {
     accounts: db.accounts,
     categories: db.categories,
     records: db.records,
-    budgets: db.budgets,
     recurring: db.recurring,
     exportDate: new Date().toISOString()
   };

@@ -47,13 +47,6 @@
               <div class="summary-amount" id="total-balance">0.00</div>
             </div>
           </div>
-          <!-- Budget bar -->
-          <div class="budget-bar" id="budget-bar" style="display:none">
-            <div class="budget-progress">
-              <div class="budget-fill" id="budget-fill"></div>
-            </div>
-            <div class="budget-text" id="budget-text"></div>
-          </div>
         </div>
       </div>
 
@@ -191,16 +184,6 @@
       </div>
     </div>
 
-    <!-- Budget Page -->
-    <div id="page-budget" class="page">
-      <div class="page-header">
-        <button class="back-btn" onclick="switchPage('home')">←</button>
-        <h2>预算管理</h2>
-        <button class="text-btn" id="btn-add-budget">+ 设置</button>
-      </div>
-      <div id="budget-list" class="budget-list"></div>
-    </div>
-
     <!-- Recurring Page -->
     <div id="page-recurring" class="page">
       <div class="page-header">
@@ -228,10 +211,6 @@
     <button class="tab" data-page="stats">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span>统计</span>
-    </button>
-    <button class="tab" data-page="budget">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
-      <span>预算</span>
     </button>
     <button class="tab" data-page="recurring">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>

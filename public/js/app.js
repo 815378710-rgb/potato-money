@@ -348,67 +348,6 @@ function renderAccounts() {
   $('#accounts-list').innerHTML = html;
 }
 
-// --- Budget Page ---
-async function renderBudget() {
-  const r = await api('GET', '/budgets?month=' + currentMonth);
-  const budgets = r.success ? r.data : [];
-
-  const monthRecords = records.filter(r => r.date && r.date.startsWith(currentMonth) && r.type === 'expense');
-  const totalExpense = monthRecords.reduce((s, r) => s + r.amount, 0);
-
-  // Total budget
-  const totalBudget = budgets.reduce((s, b) => s + b.amount, 0);
-
-  let html = '';
-  if (totalBudget > 0) {
-    const pct = Math.min(totalExpense / totalBudget * 100, 100);
-    const color = pct > 90 ? '#E74C3C' : pct > 70 ? '#F39C12' : '#2ECC71';
-    html += `<div class="budget-card">
-      <div class="budget-header">
-        <span class="budget-cat-name" style="font-size:16px">📊 总预算</span>
-        <span class="budget-amounts"><span>¥${totalExpense.toFixed(0)}</span> / ¥${totalBudget.toFixed(0)}</span>
-      </div>
-      <div class="budget-progress-bar">
-        <div class="budget-progress-fill" style="width:${pct}%;background:${color}"></div>
-      </div>
-      <div style="text-align:right;font-size:12px;color:var(--text-secondary);margin-top:4px">
-        剩余 ¥${(totalBudget - totalExpense).toFixed(2)}
-      </div>
-    </div>`;
-  }
-
-  budgets.forEach(b => {
-    const pct = b.budget > 0 ? Math.min(b.spent / b.budget * 100, 100) : 0;
-    const color = pct > 90 ? '#E74C3C' : pct > 70 ? '#F39C12' : '#2ECC71';
-    html += `<div class="budget-card">
-      <div class="budget-header">
-        <div class="budget-cat">
-          <span class="budget-cat-icon">${b.categoryIcon}</span>
-          <span class="budget-cat-name">${escapeHtml(b.categoryName)}</span>
-        </div>
-        <button style="background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer" onclick="deleteBudget('${b.id}')">×</button>
-      </div>
-      <div class="budget-amounts">已花 <span>¥${b.spent.toFixed(2)}</span> / ¥${b.budget.toFixed(2)}</div>
-      <div class="budget-progress-bar">
-        <div class="budget-progress-fill" style="width:${pct}%;background:${color}"></div>
-      </div>
-    </div>`;
-  });
-
-  if (budgets.length === 0 && totalBudget === 0) {
-    html = '<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">还没有设置预算<br>点击右上角 + 开始设置</div></div>';
-  }
-
-  $('#budget-list').innerHTML = html;
-}
-
-async function deleteBudget(id) {
-  if (!confirm('确认删除此预算？')) return;
-  await api('DELETE', '/budgets/' + id);
-  renderBudget();
-  showToast('已删除');
-}
-
 // --- Add Record Page ---
 function openAddPage() {
   amountStr = '0';
@@ -570,48 +509,7 @@ function pickMonth(month) {
   loadRecords().then(() => {
     renderHome();
     if ($('#page-stats') && $('#page-stats').classList.contains('active')) renderStats();
-    if ($('#page-budget') && $('#page-budget').classList.contains('active')) renderBudget();
   });
-}
-
-// --- Budget Add Modal ---
-function showBudgetModal() {
-  const expenseCats = categories.filter(c => c.type === 'expense');
-  let catOptions = '';
-  expenseCats.forEach(c => {
-    catOptions += `<option value="${c.id}">${c.icon} ${c.name}</option>`;
-  });
-
-  let html = `<div class="modal-overlay" id="budget-modal" onclick="closeBudgetModal(event)">
-    <div class="modal-box">
-      <h3>设置预算 (${currentMonth})</h3>
-      <div class="budget-form">
-        <select id="budget-category">${catOptions}</select>
-        <input type="number" id="budget-amount" placeholder="预算金额" min="0" step="100">
-        <button onclick="saveBudget()">确认</button>
-      </div>
-    </div></div>`;
-  document.body.insertAdjacentHTML('beforeend', html);
-}
-
-function closeBudgetModal(e) {
-  if (e && e.target.id !== 'budget-modal') return;
-  const modal = $('#budget-modal');
-  if (modal) modal.remove();
-}
-
-async function saveBudget() {
-  const categoryId = $('#budget-category').value;
-  const amount = parseFloat($('#budget-amount').value);
-  if (!amount || amount <= 0) {
-    showToast('请输入预算金额');
-    return;
-  }
-
-  await api('POST', '/budgets', { categoryId, amount, month: currentMonth });
-  closeBudgetModal({ target: { id: 'budget-modal' } });
-  renderBudget();
-  showToast('预算已设置');
 }
 
 // --- Navigation ---
@@ -627,7 +525,6 @@ function switchPage(page) {
   if (page === 'records') renderRecords();
   if (page === 'stats') renderStats();
   if (page === 'accounts') renderAccounts();
-  if (page === 'budget') renderBudget();
   if (page === 'recurring') renderRecurring();
 }
 
@@ -891,9 +788,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add recurring
   $('#btn-add-recurring').addEventListener('click', showRecurringModal);
-
-  // Add budget
-  $('#btn-add-budget').addEventListener('click', showBudgetModal);
 
   // Type tabs in add page
   $$('.type-tab').forEach(tab => {

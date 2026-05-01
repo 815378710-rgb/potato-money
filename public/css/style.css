@@ -112,22 +112,6 @@ body {
 .summary-amount.income { color: #10B981; }
 .summary-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.15); }
 
-/* === Budget bar === */
-.budget-bar { margin-top: 14px; }
-.budget-progress {
-  height: 6px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.budget-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #10B981, #F59E0B, #EF4444);
-  border-radius: 3px;
-  transition: width 0.4s ease;
-}
-.budget-text { font-size: 11px; opacity: 0.6; margin-top: 6px; text-align: right; }
-
 /* === Sections === */
 .section { padding: 0 16px; margin-top: 18px; }
 .section-header {
@@ -385,7 +369,7 @@ body {
   background: rgba(255,255,255,0.95);
   backdrop-filter: blur(20px);
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   align-items: end;
   border-top: 1px solid var(--border);
   z-index: 100;
@@ -492,39 +476,6 @@ body {
   transition: width 0.4s ease;
 }
 
-/* === Budget === */
-.budget-list { padding: 16px; }
-.budget-card {
-  background: var(--card);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow-sm);
-}
-.budget-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.budget-cat { display: flex; align-items: center; gap: 8px; }
-.budget-cat-icon { font-size: 22px; }
-.budget-cat-name { font-size: 15px; font-weight: 600; }
-.budget-amounts { font-size: 13px; color: var(--text-secondary); }
-.budget-amounts span { font-weight: 700; color: var(--text); }
-.budget-progress-bar {
-  height: 8px;
-  background: var(--bg);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 10px;
-}
-.budget-progress-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
 /* === Toast === */
 .toast {
   position: fixed;
@@ -606,36 +557,6 @@ body {
   box-shadow: 0 2px 8px rgba(255,107,107,0.3);
 }
 .month-grid button:active { transform: scale(0.95); }
-
-/* === Budget Add Modal === */
-.budget-form { padding: 16px; }
-.budget-form select,
-.budget-form input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  margin-bottom: 14px;
-  transition: border-color 0.2s;
-  outline: none;
-}
-.budget-form select:focus,
-.budget-form input:focus { border-color: var(--primary); }
-.budget-form button {
-  width: 100%;
-  padding: 13px;
-  background: linear-gradient(135deg, #FF6B6B, #E74C3C);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(255,107,107,0.3);
-  transition: all 0.15s;
-}
-.budget-form button:active { transform: scale(0.97); }
 
 /* === Scrollbar === */
 ::-webkit-scrollbar { width: 0; height: 0; }
