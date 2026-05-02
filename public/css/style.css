@@ -370,7 +370,8 @@ body {
   backdrop-filter: blur(20px);
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  align-items: end;
+  align-items: center;
+  justify-items: center;
   border-top: 1px solid var(--border);
   z-index: 100;
 }
@@ -401,18 +402,17 @@ body {
   cursor: pointer;
 }
 .add-btn-circle {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   background: linear-gradient(135deg, #FF6B6B 0%, #E74C3C 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 28px;
   color: white;
   font-weight: 300;
-  box-shadow: 0 4px 16px rgba(255,107,107,0.4);
-  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(255,107,107,0.4);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .tab-add:active .add-btn-circle { transform: scale(0.9) translateY(2px); box-shadow: 0 2px 8px rgba(255,107,107,0.3); }
