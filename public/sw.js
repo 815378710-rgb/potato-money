@@ -1,4 +1,4 @@
-const CACHE_NAME = 'potato-money-v4';
+const CACHE_NAME = 'potato-money-v5';
 const ASSETS = [
   '/',
   '/manifest.json',
